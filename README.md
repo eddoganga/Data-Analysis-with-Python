@@ -30,7 +30,7 @@ from surprise import Reader, Dataset
 # It is to specify how to read the data frame.
 reader = Reader(rating_scale=(1,5))
 # create the traindata from the data frame
-train_data_mf = Dataset.load_from_df(train_data[['userId', 'movieId', 'rating']], reader)
+train_data_mf = Dataset.load_from_df(train_data[['movie_titel', 'genre', 'director']], reader)
 # build the train set from traindata. 
 #It is of dataset format from surprise library
 trainset = train_data_mf.build_full_trainset()
