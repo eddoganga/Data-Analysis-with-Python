@@ -12,16 +12,30 @@ df.info()
 df.dropna()
 
 dummies = []
-cols = ['Gender', 'Year of Release', 'Director']
+cols = ['MovieLense', 'Cast', 'Crew']
 for col in cols:
    dummies.append(pd.get_dummies(df[col]))
+
+data.columns=['movie_title', 'genre', 'release date', 'director', 'actor'] data.drop('actor',axis=1,inplace=True)
+
+
+
 ```
 #Feature Engineering
 ```
-# Removing percentage sign from RT critic score
-for index, row in df.iterrows():
-    if pd.notnull(row['rt_critic_score']):
-        df.loc[index, 'rt_critic_score'] = int(row['rt_critic_score'][:2])
+from surprise import SVD
+import numpy as np
+import surprise
+from surprise import Reader, Dataset
+# It is to specify how to read the data frame.
+reader = Reader(rating_scale=(1,5))
+# create the traindata from the data frame
+train_data_mf = Dataset.load_from_df(train_data[['userId', 'movieId', 'rating']], reader)
+# build the train set from traindata. 
+#It is of dataset format from surprise library
+trainset = train_data_mf.build_full_trainset()
+svd = SVD(n_factors=100, biased=True, random_state=15, verbose=True)
+svd.fit(trainset)
 ```
 #Model selection
 ```
