@@ -60,25 +60,89 @@ Choose appropriate machine learning algorithms for classification tasks. Common 
 Consider using ensemble methods to improve model performance.
 ```
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 
+# Split the dataset into training and testing sets (e.g., 80% train, 20% test)
 X_train, X_test, y_train, y_test = train_test_split(df.drop(columns=['churn']), df['churn'], test_size=0.2, random_state=42)
 
-# Create and train a Logistic Regression model
-logistic_model = LogisticRegression()
-logistic_model.fit(X_train, y_train)
+# Create and train a Decision Tree model
+tree_model = DecisionTreeClassifier()
+tree_model.fit(X_train, y_train)
 
 # Evaluate the model on the test set
-logistic_accuracy = logistic_model.score(X_test, y_test)
+tree_accuracy = tree_model.score(X_test, y_test)
+
 ```
 
 ## Model Training:
 Train the selected models on the training data.
-Use techniques like cross-validation to tune hyperparameters and prevent overfitting.
+Use techniques like cross-validation to tune hyperparameters and prevent overfitting.By performing hyperparameter tuning for the Decision Tree model using cross-validation, you can find the best max_depth value to prevent overfitting and optimize model performance.
+```
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
+
+# Scale the data using StandardScaler
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create a Logistic Regression model
+logistic_model = LogisticRegression(max_iter=1000)  # Increase max_iter to a suitable value
+
+# Define hyperparameters to tune
+param_grid = {'C': [0.001, 0.01, 0.1, 1, 10]}
+
+# Create a GridSearchCV object with cross-validation
+grid_search_logistic = GridSearchCV(logistic_model, param_grid, cv=5, scoring='accuracy')
+
+# Fit the model and perform hyperparameter tuning on scaled data
+grid_search_logistic.fit(X_train_scaled, y_train)
+
+# Get the best hyperparameters and the best model
+best_params_logistic = grid_search_logistic.best_params_
+best_model_logistic = grid_search_logistic.best_estimator_
+
+# Evaluate the best model on the test set
+logistic_accuracy = best_model_logistic.score(X_test_scaled, y_test)
+print("Logistic Regression Accuracy:", logistic_accuracy)
+```
 
 ## Model Evaluation:
 Evaluate model performance using appropriate metrics such as accuracy, precision, recall, F1-score, and ROC-AUC.
 Consider the business context and choose the evaluation metric that aligns with Sprint's goals. For churn prediction, often recall (to minimize false negatives) and ROC-AUC (to measure overall model performance) are crucial.
+```
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve
+import matplotlib.pyplot as plt
+
+# Evaluate Logistic Regression model
+logistic_y_pred = best_model_logistic.predict(X_test_scaled)
+
+logistic_accuracy = accuracy_score(y_test, logistic_y_pred)
+logistic_precision = precision_score(y_test, logistic_y_pred)
+logistic_recall = recall_score(y_test, logistic_y_pred)
+logistic_f1 = f1_score(y_test, logistic_y_pred)
+logistic_roc_auc = roc_auc_score(y_test, best_model_logistic.predict_proba(X_test_scaled)[:, 1])
+
+# Print the metrics for Logistic Regression
+print("Logistic Regression Metrics:")
+print(f"Accuracy: {logistic_accuracy:.2f}")
+print(f"Precision: {logistic_precision:.2f}")
+print(f"Recall: {logistic_recall:.2f}")
+print(f"F1-Score: {logistic_f1:.2f}")
+print(f"ROC-AUC: {logistic_roc_auc:.2f}")
+
+# ROC curve for Logistic Regression
+fpr_logistic, tpr_logistic, _ = roc_curve(y_test, best_model_logistic.predict_proba(X_test_scaled)[:, 1])
+plt.figure(figsize=(8, 6))
+plt.plot(fpr_logistic, tpr_logistic, label="Logistic Regression (AUC = {:.2f})".format(logistic_roc_auc))
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc='lower right')
+plt.show()
+```
 
 ## Model Interpretability:
 Understand why the model makes certain predictions. This can be important for identifying actionable insights to reduce churn.
