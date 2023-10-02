@@ -11,19 +11,66 @@ A churn event typically refers to a specific event or action taken by a customer
 Gather historical customer data, including demographic information, usage patterns, contract details, customer service interactions, and churn history.
 Ensure the data is clean, relevant, and well-structured.
 
+```
+import pandas as pd
+df = pd.read_csv('data.csv')
+```
+
 ## Data Preprocessing:
 Handle missing data by imputing or removing it as appropriate.
 Encode categorical variables using techniques like one-hot encoding or label encoding.
-Scale numerical features to ensure they have similar scales (e.g., using Min-Max scaling or Standardization).
-Split the data into training and testing sets for model evaluation.
+Scale numerical features to ensure they have similar scales 
+
+```
+df.info()
+#handle missing data
+df.dropna(inplace=True)
+#encode categorical variables
+df = pd.get_dummies(df, columns=['gender'], drop_first=True)
+#scaling numerical features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[['data_usage', 'voice_usage']] = scaler.fit_transform(df[['data_usage', 'voice_usage']])
+```
 
 ## Feature Engineering:
 Create new features if they can provide valuable insights. For example, you can calculate customer tenure, average usage, or loyalty program participation.
 Feature selection techniques such as recursive feature elimination or feature importance analysis can help identify the most relevant features.
 
+```
+# Calculate customer tenure in months (assuming contract_length is in months)
+df['tenure'] = df['contract_length']
+
+# Calculate average usage of all services
+df['average_usage'] = (df['data_usage'] + df['voice_usage'] + df['roaming_usage']) / 3
+
+# Calculate total usage of all services
+df['total_usage'] = df['data_usage'] + df['voice_usage'] + df['roaming_usage']
+
+# Create a binary 'high_usage' feature based on a threshold
+threshold = 200  # Example threshold, adjust as needed
+df['high_usage'] = (df['total_usage'] > threshold).astype(int)
+
+# Convert 'churn' to integer (0 for False, 1 for True) if needed
+df['churn'] = df['churn'].astype(int)
+```
+
 ## Model Selection:
 Choose appropriate machine learning algorithms for classification tasks. Common choices include logistic regression, decision trees, random forests, gradient boosting, and neural networks.
 Consider using ensemble methods to improve model performance.
+```
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X_train, X_test, y_train, y_test = train_test_split(df.drop(columns=['churn']), df['churn'], test_size=0.2, random_state=42)
+
+# Create and train a Logistic Regression model
+logistic_model = LogisticRegression()
+logistic_model.fit(X_train, y_train)
+
+# Evaluate the model on the test set
+logistic_accuracy = logistic_model.score(X_test, y_test)
+```
 
 ## Model Training:
 Train the selected models on the training data.
