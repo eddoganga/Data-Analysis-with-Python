@@ -38,7 +38,7 @@ Create new features if they can provide valuable insights. For example, you can 
 Feature selection techniques such as recursive feature elimination or feature importance analysis can help identify the most relevant features.
 
 ```
-# Calculate customer tenure in months (assuming contract_length is in months)
+# Calculate customer tenure in months 
 df['tenure'] = df['contract_length']
 
 # Calculate average usage of all services
@@ -48,7 +48,7 @@ df['average_usage'] = (df['data_usage'] + df['voice_usage'] + df['roaming_usage'
 df['total_usage'] = df['data_usage'] + df['voice_usage'] + df['roaming_usage']
 
 # Create a binary 'high_usage' feature based on a threshold
-threshold = 200  # Example threshold, adjust as needed
+threshold = 200  
 df['high_usage'] = (df['total_usage'] > threshold).astype(int)
 
 # Convert 'churn' to integer (0 for False, 1 for True) if needed
